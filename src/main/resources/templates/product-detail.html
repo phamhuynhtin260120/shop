@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(${product.name})}"></head>
+<body>
+<header th:replace="~{fragments/layout :: header}"></header>
+
+<main class="container section">
+    <nav class="breadcrumb">
+        <a th:href="@{/}">Trang chủ</a> /
+        <a th:href="@{/products(category=${product.category.slug})}" th:text="${product.category.name}">Áo</a> /
+        <span th:text="${product.name}">Tên</span>
+    </nav>
+
+    <div class="detail">
+        <div class="detail-media">
+            <img th:if="${product.imageUrl}" th:src="${product.imageUrl}" th:alt="${product.name}">
+            <div th:unless="${product.imageUrl}" class="ph" th:style="|--h:${(product.id * 47) % 360}|">
+                <span th:text="${product.category.name}">Áo</span>
+            </div>
+        </div>
+
+        <div class="detail-info">
+            <span th:if="${product.bestSeller}" class="tag tag-inline">Best Seller</span>
+            <h1 th:text="${product.name}">Tên sản phẩm</h1>
+            <p class="price price-lg" th:text="|${#numbers.formatDecimal(product.price, 0, 'POINT', 0, 'COMMA')}₫|">255.000₫</p>
+
+            <p class="stock" th:if="${product.inStock}" th:text="'Còn hàng (' + ${product.stock} + ' sản phẩm)'">Còn hàng</p>
+            <p class="stock stock-out" th:unless="${product.inStock}">Tạm hết hàng</p>
+
+            <!-- Form thêm vào giỏ: /cart/add sẽ được làm ở bước Giỏ hàng -->
+            <form class="buy" th:action="@{/cart/add}" method="post">
+                <input type="hidden" name="productId" th:value="${product.id}">
+                <label for="qty">Số lượng</label>
+                <input id="qty" type="number" name="quantity" value="1" min="1" th:max="${product.stock}">
+                <button class="btn btn-dark" type="submit" th:disabled="${!product.inStock}">Thêm vào giỏ</button>
+            </form>
+
+            <div class="desc">
+                <h3>Mô tả</h3>
+                <p th:text="${product.description}">Mô tả</p>
+            </div>
+
+            <ul class="policies">
+                <li>Miễn phí vận chuyển cho đơn từ 500.000₫</li>
+                <li>Giao tiêu chuẩn 3–5 ngày, hỏa tốc trong 24 giờ</li>
+                <li>Thanh toán khi nhận hàng (COD), VNPay hoặc MoMo</li>
+                <li>Đổi trả trong 7 ngày nếu sản phẩm lỗi</li>
+            </ul>
+        </div>
+    </div>
+
+    <section class="section" th:unless="${#lists.isEmpty(related)}">
+        <div class="section-head"><h2>Có thể bạn cũng thích</h2></div>
+        <div class="grid">
+            <th:block th:each="p : ${related}"><article th:replace="~{fragments/layout :: card(${p})}"></article></th:block>
+        </div>
+    </section>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(${title})}"></head>
+<body>
+<header th:replace="~{fragments/layout :: header}"></header>
+
+<main class="container section">
+    <nav class="breadcrumb"><a th:href="@{/}">Trang chủ</a> / <span th:text="${title}">Tất cả</span></nav>
+    <div class="section-head">
+        <h1 class="page-title" th:text="${title}">Tất cả sản phẩm</h1>
+        <span class="muted" th:text="${page.totalElements} + ' sản phẩm'">12 sản phẩm</span>
+    </div>
+
+    <!-- Bộ lọc danh mục -->
+    <div class="chips">
+        <a class="chip" th:classappend="${category == null and !best and q == null} ? 'active'" th:href="@{/products}">Tất cả</a>
+        <a class="chip" th:classappend="${best} ? 'active'" th:href="@{/products(best=true)}">Bán chạy</a>
+        <a th:each="c : ${navCategories}" class="chip"
+           th:classappend="${c.slug == category} ? 'active'"
+           th:href="@{/products(category=${c.slug})}" th:text="${c.name}">Áo</a>
+    </div>
+
+    <div class="grid" th:unless="${page.empty}">
+        <th:block th:each="p : ${page.content}"><article th:replace="~{fragments/layout :: card(${p})}"></article></th:block>
+    </div>
+
+    <div class="empty" th:if="${page.empty}">
+        <p>Không có sản phẩm phù hợp.</p>
+        <a class="btn btn-dark" th:href="@{/products}">Xem tất cả sản phẩm</a>
+    </div>
+
+    <!-- Phân trang -->
+    <nav class="pagination" th:if="${page.totalPages > 1}" aria-label="Phân trang">
+        <a th:each="i : ${#numbers.sequence(0, page.totalPages - 1)}"
+           th:href="@{/products(category=${category}, q=${q}, best=${best}, page=${i})}"
+           th:text="${i + 1}"
+           th:classappend="${i == page.number} ? 'active'">1</a>
+    </nav>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

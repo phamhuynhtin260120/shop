@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Trang chủ')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: header}"></header>
+
+<main>
+    <!-- Banner chính -->
+    <section class="hero">
+        <div class="container hero-inner">
+            <p class="eyebrow">Bộ sưu tập Thu Đông 2026</p>
+            <h1>Mặc đơn giản,<br>sống thoải mái.</h1>
+            <p class="hero-sub">Chất liệu tự nhiên, phom dáng dễ mặc cho mọi ngày.</p>
+            <a class="btn btn-dark" th:href="@{/products}">Khám phá ngay</a>
+        </div>
+    </section>
+
+    <!-- Hàng mới -->
+    <section class="container section">
+        <div class="section-head">
+            <h2>Hàng mới</h2>
+            <a class="link-more" th:href="@{/products}">Xem tất cả →</a>
+        </div>
+        <div class="grid">
+            <th:block th:each="p : ${newArrivals}"><article th:replace="~{fragments/layout :: card(${p})}"></article></th:block>
+        </div>
+    </section>
+
+    <!-- Banner khuyến mãi -->
+    <section class="container">
+        <div class="promo">
+            <div>
+                <p class="eyebrow">Ưu đãi giao hàng</p>
+                <h2>Freeship cho đơn từ 500.000₫</h2>
+            </div>
+            <a class="btn btn-light" th:href="@{/products(best=true)}">Mua sắm ngay</a>
+        </div>
+    </section>
+
+    <!-- Bán chạy -->
+    <section class="container section">
+        <div class="section-head">
+            <h2>Bán chạy</h2>
+            <a class="link-more" th:href="@{/products(best=true)}">Xem tất cả →</a>
+        </div>
+        <div class="grid">
+            <th:block th:each="p : ${bestSellers}"><article th:replace="~{fragments/layout :: card(${p})}"></article></th:block>
+        </div>
+    </section>
+
+    <!-- Danh mục -->
+    <section class="container section">
+        <div class="section-head"><h2>Danh mục</h2></div>
+        <div class="cat-grid">
+            <a th:each="c, s : ${navCategories}" class="cat-tile"
+               th:href="@{/products(category=${c.slug})}"
+               th:style="|--h:${(s.index * 70 + 20) % 360}|">
+                <span th:text="${c.name}">Áo</span>
+            </a>
+        </div>
+    </section>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

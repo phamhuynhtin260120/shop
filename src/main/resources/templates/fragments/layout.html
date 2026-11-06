@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
+<!-- ====== <head> dùng chung: nhận tham số title ====== -->
+<head th:fragment="head(title)">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="${title} + ' | Pattern Store'">Pattern Store</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+
+<body>
+
+<!-- ====== Header ====== -->
+<header th:fragment="header" class="site-header">
+    <div class="topbar">Miễn phí vận chuyển cho đơn từ 500.000₫ &nbsp;·&nbsp; Đổi trả trong 7 ngày</div>
+    <div class="header-main container">
+        <nav class="nav-main" aria-label="Danh mục">
+            <a th:href="@{/products}">Hàng mới</a>
+            <a th:href="@{/products(best=true)}">Bán chạy</a>
+            <a th:each="c : ${navCategories}"
+               th:href="@{/products(category=${c.slug})}"
+               th:text="${c.name}">Áo</a>
+        </nav>
+
+        <a class="logo" th:href="@{/}">PATTERN<span>store</span></a>
+
+        <div class="header-actions">
+            <form class="search" th:action="@{/products}" method="get" role="search">
+                <input type="search" name="q" placeholder="Tìm sản phẩm..." th:value="${q}" aria-label="Tìm sản phẩm">
+                <button type="submit" aria-label="Tìm">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+                </button>
+            </form>
+            <a class="icon-link" href="#" aria-label="Tài khoản">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>
+                <span class="hide-sm">Đăng nhập</span>
+            </a>
+            <a class="icon-link cart-link" href="#" aria-label="Giỏ hàng">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 7h14l-1.2 12.2a2 2 0 0 1-2 1.8H8.2a2 2 0 0 1-2-1.8z"/><path d="M9 7V6a3 3 0 0 1 6 0v1"/></svg>
+                <span class="badge" th:text="${cartCount}">0</span>
+            </a>
+        </div>
+    </div>
+</header>
+
+<!-- ====== Thẻ sản phẩm: nhận tham số p (Product) ====== -->
+<article th:fragment="card(p)" class="card">
+    <a class="card-media" th:href="@{/products/{id}(id=${p.id})}">
+        <img th:if="${p.imageUrl}" th:src="${p.imageUrl}" th:alt="${p.name}" loading="lazy">
+        <div th:unless="${p.imageUrl}" class="ph" th:style="|--h:${(p.id * 47) % 360}|">
+            <span th:text="${p.category.name}">Áo</span>
+        </div>
+        <span th:if="${p.bestSeller}" class="tag">Best Seller</span>
+        <span th:unless="${p.inStock}" class="tag tag-out">Hết hàng</span>
+    </a>
+    <div class="card-body">
+        <h3 class="card-name"><a th:href="@{/products/{id}(id=${p.id})}" th:text="${p.name}">Tên sản phẩm</a></h3>
+        <p class="price" th:text="|${#numbers.formatDecimal(p.price, 0, 'POINT', 0, 'COMMA')}₫|">255.000₫</p>
+        <a class="btn btn-outline btn-sm" th:href="@{/products/{id}(id=${p.id})}">Mua ngay</a>
+    </div>
+</article>
+
+<!-- ====== Footer ====== -->
+<footer th:fragment="footer" class="site-footer">
+    <div class="container footer-grid">
+        <div>
+            <a class="logo logo-footer" th:href="@{/}">PATTERN<span>store</span></a>
+            <p class="muted">Đồ án học phần Mẫu thiết kế cho phần mềm. Website bán thời trang minh họa 8 design pattern trên Spring Boot.</p>
+        </div>
+        <div>
+            <h4>Mua sắm</h4>
+            <a th:href="@{/products}">Hàng mới</a>
+            <a th:href="@{/products(best=true)}">Bán chạy</a>
+            <a th:each="c : ${navCategories}" th:href="@{/products(category=${c.slug})}" th:text="${c.name}">Áo</a>
+        </div>
+        <div>
+            <h4>Hỗ trợ</h4>
+            <span>Chính sách đổi trả 7 ngày</span>
+            <span>Giao hàng tiêu chuẩn / hỏa tốc</span>
+            <span>Thanh toán COD, VNPay, MoMo</span>
+        </div>
+        <div>
+            <h4>Liên hệ</h4>
+            <span>Trường Đại học Gia Định</span>
+            <span>Khoa Công nghệ Thông tin</span>
+            <span>TP. Hồ Chí Minh</span>
+        </div>
+    </div>
+    <div class="container footer-bottom">© 2026 Pattern Store · Lớp học phần 020100138402</div>
+</footer>
+
+</body>
+</html>
