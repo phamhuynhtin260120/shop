@@ -22,5 +22,26 @@ services:
     depends_on:
       - postgres
 
+  app:                               # ứng dụng Spring Boot, chạy bằng JDK + Maven trong container
+    image: maven:3.9-eclipse-temurin-21
+    container_name: shop-app
+    working_dir: /app
+    command: mvn spring-boot:run
+    ports:
+      - "8081:8080"                  # mở http://localhost:8081 (cổng 8080 trên Mac đang bị node chiếm)
+    volumes:
+      - ./:/app                      # mã nguồn trên máy được "gắn" vào container
+      - m2:/root/.m2                 # lưu thư viện Maven, lần sau khỏi tải lại
+    environment:
+      # Trong mạng Docker, database có tên máy là "postgres" (không phải localhost)
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/shopdb
+      # Đọc HTML/CSS trực tiếp từ thư mục nguồn: sửa giao diện chỉ cần F5 trình duyệt
+      SPRING_THYMELEAF_PREFIX: file:/app/src/main/resources/templates/
+      SPRING_THYMELEAF_CACHE: "false"
+      SPRING_WEB_RESOURCES_STATIC_LOCATIONS: file:/app/src/main/resources/static/
+    depends_on:
+      - postgres
+
 volumes:
   pgdata:
+  m2:
