@@ -35,17 +35,41 @@
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
                 </button>
             </form>
-            <a class="icon-link" href="#" aria-label="Tài khoản">
+            <!-- Khách vãng lai -->
+            <a th:if="${currentUser == null}" class="icon-link" th:href="@{/login}" aria-label="Đăng nhập">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>
                 <span class="hide-sm">Đăng nhập</span>
             </a>
-            <a class="icon-link cart-link" href="#" aria-label="Giỏ hàng">
+            <!-- Đã đăng nhập -->
+            <th:block th:if="${currentUser != null}">
+                <a th:if="${currentUser.admin}" class="icon-link admin-link" th:href="@{/admin}">Quản trị</a>
+                <a class="icon-link" th:href="@{/orders}" title="Đơn hàng của tôi">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>
+                    <span class="hide-sm user-name" th:text="${currentUser.fullName}">Tên</span>
+                </a>
+                <form class="inline-form" th:action="@{/logout}" method="post">
+                    <button class="btn-text" type="submit">Đăng xuất</button>
+                </form>
+            </th:block>
+            <a class="icon-link cart-link" th:href="@{/cart}" aria-label="Giỏ hàng">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 7h14l-1.2 12.2a2 2 0 0 1-2 1.8H8.2a2 2 0 0 1-2-1.8z"/><path d="M9 7V6a3 3 0 0 1 6 0v1"/></svg>
                 <span class="badge" th:text="${cartCount}">0</span>
             </a>
         </div>
     </div>
+    <!-- Thông báo sau khi thêm/sửa/xóa (flash attribute từ Controller) -->
+    <div class="flash flash-success" th:if="${success}" th:text="${success}" role="status">Thành công</div>
+    <div class="flash flash-error" th:if="${error}" th:text="${error}" role="alert">Lỗi</div>
+    <div class="flash flash-error" th:if="${param.denied}" role="alert">Bạn không có quyền truy cập trang quản trị</div>
 </header>
+
+<!-- ====== Menu trang quản trị: tham số active = dashboard | orders | products | vouchers ====== -->
+<nav th:fragment="adminNav(active)" class="admin-nav" aria-label="Quản trị">
+    <a th:href="@{/admin}" th:classappend="${active == 'dashboard'} ? 'active'">Tổng quan</a>
+    <a th:href="@{/admin/orders}" th:classappend="${active == 'orders'} ? 'active'">Đơn hàng</a>
+    <a th:href="@{/admin/products}" th:classappend="${active == 'products'} ? 'active'">Sản phẩm</a>
+    <a th:href="@{/admin/vouchers}" th:classappend="${active == 'vouchers'} ? 'active'">Voucher</a>
+</nav>
 
 <!-- ====== Thẻ sản phẩm: nhận tham số p (Product) ====== -->
 <article th:fragment="card(p)" class="card">
@@ -79,6 +103,7 @@
         </div>
         <div>
             <h4>Hỗ trợ</h4>
+            <a th:href="@{/orders}">Đơn hàng của tôi</a>
             <span>Chính sách đổi trả 7 ngày</span>
             <span>Giao hàng tiêu chuẩn / hỏa tốc</span>
             <span>Thanh toán COD, VNPay, MoMo</span>

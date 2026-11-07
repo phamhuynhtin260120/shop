@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Đơn ' + ${order.code})}"></head>
+<body>
+<header th:replace="~{fragments/layout :: header}"></header>
+
+<main class="container section">
+    <nav class="breadcrumb"><a th:href="@{/}">Trang chủ</a> / <a th:href="@{/orders}">Đơn hàng của tôi</a> / <span th:text="${order.code}">PS</span></nav>
+
+    <div class="order-head">
+        <div>
+            <h1 class="page-title">Đơn <span th:text="${order.code}">PS</span></h1>
+            <p class="muted" th:text="'Đặt lúc ' + ${#temporals.format(order.createdAt, 'HH:mm dd/MM/yyyy')}">Đặt lúc</p>
+        </div>
+        <div class="order-actions">
+            <span th:class="'status status-lg status-' + ${#strings.toLowerCase(order.status)}" th:text="${order.state.label()}">Trạng thái</span>
+            <!-- Nút hủy chỉ hiện khi trạng thái hiện tại cho phép (mẫu State) -->
+            <form th:if="${order.state.canCancel()}" th:action="@{/orders/{id}/cancel(id=${order.id})}" method="post">
+                <button class="btn btn-outline btn-sm" type="submit">Hủy đơn</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="order-grid">
+        <div>
+            <div class="table-wrap">
+                <table class="table">
+                    <thead><tr><th>Sản phẩm</th><th class="num">Đơn giá</th><th class="num">SL</th><th class="num">Thành tiền</th></tr></thead>
+                    <tbody>
+                    <tr th:each="i : ${order.items}">
+                        <td><a th:href="@{/products/{id}(id=${i.product.id})}" th:text="${i.productName}">Tên</a></td>
+                        <td class="num" th:text="|${#numbers.formatDecimal(i.unitPrice, 0, 'POINT', 0, 'COMMA')}₫|">0₫</td>
+                        <td class="num" th:text="${i.quantity}">1</td>
+                        <td class="num" th:text="|${#numbers.formatDecimal(i.lineTotal, 0, 'POINT', 0, 'COMMA')}₫|">0₫</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="panel">
+                <h2>Lịch sử trạng thái</h2>
+                <ol class="timeline">
+                    <li th:each="h : ${order.history}">
+                        <strong th:text="${h.toLabel}">Chờ thanh toán</strong>
+                        <span class="muted small" th:text="${#temporals.format(h.changedAt, 'HH:mm:ss dd/MM/yyyy')}">thời gian</span>
+                    </li>
+                </ol>
+            </div>
+
+            <div class="panel">
+                <h2>Thanh toán</h2>
+                <ul class="pay-list">
+                    <li th:each="p : ${order.payments}">
+                        <span th:class="${p.status == 'SUCCESS'} ? 'status status-delivered' : 'status status-cancelled'"
+                              th:text="${p.status == 'SUCCESS'} ? 'Thành công' : 'Thất bại'">OK</span>
+                        <span th:text="${p.message}">Thông điệp</span>
+                        <span class="muted small" th:if="${p.transactionRef}" th:text="'Mã GD: ' + ${p.transactionRef}">Mã</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <aside class="cart-summary">
+            <h2>Thông tin giao hàng</h2>
+            <p class="ship-info">
+                <strong th:text="${order.receiverName}">Tên</strong><br>
+                <span th:text="${order.phone}">SĐT</span><br>
+                <span th:text="${order.shippingAddress}">Địa chỉ</span>
+            </p>
+            <p class="muted small" th:if="${order.note}" th:text="'Ghi chú: ' + ${order.note}"></p>
+            <div class="sum-row"><span>Vận chuyển</span><span th:text="${order.shippingMethodLabel}">Giao</span></div>
+            <div class="sum-row"><span>Thanh toán</span><span th:text="${order.paymentMethodLabel}">COD</span></div>
+            <hr class="sep">
+            <div class="sum-row"><span>Tạm tính</span><span th:text="|${#numbers.formatDecimal(order.subtotal, 0, 'POINT', 0, 'COMMA')}₫|">0₫</span></div>
+            <div class="sum-row discount" th:if="${order.discount.signum() > 0}"><span th:text="${order.voucher != null ? 'Giảm giá (' + order.voucher.code + ')' : 'Giảm giá'}">Giảm giá</span>
+                <span th:text="|-${#numbers.formatDecimal(order.discount, 0, 'POINT', 0, 'COMMA')}₫|">0₫</span></div>
+            <div class="sum-row"><span>Thuế VAT</span><span th:text="|${#numbers.formatDecimal(order.vat, 0, 'POINT', 0, 'COMMA')}₫|">0₫</span></div>
+            <div class="sum-row"><span>Phí vận chuyển</span><span th:text="|${#numbers.formatDecimal(order.shippingFee, 0, 'POINT', 0, 'COMMA')}₫|">0₫</span></div>
+            <div class="sum-row sum-total"><span>Tổng cộng</span><strong th:text="|${#numbers.formatDecimal(order.total, 0, 'POINT', 0, 'COMMA')}₫|">0₫</strong></div>
+        </aside>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

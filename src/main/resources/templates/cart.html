@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Giỏ hàng')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: header}"></header>
+
+<main class="container section">
+    <nav class="breadcrumb"><a th:href="@{/}">Trang chủ</a> / <span>Giỏ hàng</span></nav>
+    <div class="section-head">
+        <h1 class="page-title">Giỏ hàng</h1>
+        <span class="muted" th:unless="${cart.empty}" th:text="${cart.totalQuantity} + ' sản phẩm'">3 sản phẩm</span>
+    </div>
+
+    <!-- Giỏ trống -->
+    <div class="empty" th:if="${cart.empty}">
+        <p>Giỏ hàng của bạn đang trống.</p>
+        <a class="btn btn-dark" th:href="@{/products}">Tiếp tục mua sắm</a>
+    </div>
+
+    <div class="cart" th:unless="${cart.empty}">
+        <!-- Danh sách sản phẩm -->
+        <div class="cart-lines">
+            <div class="cart-line cart-line-head">
+                <span>Sản phẩm</span><span>Đơn giá</span><span>Số lượng</span><span>Thành tiền</span><span></span>
+            </div>
+
+            <div class="cart-line" th:each="item : ${cart.items}" th:with="p=${item.product}">
+                <div class="cart-product">
+                    <a class="cart-thumb" th:href="@{/products/{id}(id=${p.id})}">
+                        <img th:if="${p.imageUrl}" th:src="${p.imageUrl}" th:alt="${p.name}">
+                        <div th:unless="${p.imageUrl}" class="ph" th:style="|--h:${(p.id * 47) % 360}|"></div>
+                    </a>
+                    <div>
+                        <a class="cart-name" th:href="@{/products/{id}(id=${p.id})}" th:text="${p.name}">Tên</a>
+                        <span class="muted small" th:text="${p.category.name}">Áo</span>
+                    </div>
+                </div>
+
+                <span class="price" data-label="Đơn giá"
+                      th:text="|${#numbers.formatDecimal(p.price, 0, 'POINT', 0, 'COMMA')}₫|">255.000₫</span>
+
+                <form class="qty-form" th:action="@{/cart/update}" method="post" data-label="Số lượng">
+                    <input type="hidden" name="productId" th:value="${p.id}">
+                    <input type="number" name="quantity" min="0" th:max="${p.stock}" th:value="${item.quantity}"
+                           aria-label="Số lượng">
+                    <button class="btn-text" type="submit">Cập nhật</button>
+                </form>
+
+                <span class="price" data-label="Thành tiền"
+                      th:text="|${#numbers.formatDecimal(item.lineTotal, 0, 'POINT', 0, 'COMMA')}₫|">510.000₫</span>
+
+                <form th:action="@{/cart/remove}" method="post">
+                    <input type="hidden" name="productId" th:value="${p.id}">
+                    <button class="btn-remove" type="submit" aria-label="Xóa sản phẩm">✕</button>
+                </form>
+            </div>
+
+            <a class="link-more" th:href="@{/products}">← Tiếp tục mua sắm</a>
+        </div>
+
+        <!-- Tóm tắt đơn -->
+        <aside class="cart-summary">
+            <h2>Tóm tắt</h2>
+            <div class="sum-row">
+                <span>Tạm tính</span>
+                <strong th:text="|${#numbers.formatDecimal(cart.subtotal, 0, 'POINT', 0, 'COMMA')}₫|">765.000₫</strong>
+            </div>
+            <div class="sum-row muted">
+                <span>Phí vận chuyển</span><span>Tính ở bước thanh toán</span>
+            </div>
+
+            <p class="freeship" th:if="${freeShipRemaining.signum() > 0}">
+                Mua thêm <strong th:text="|${#numbers.formatDecimal(freeShipRemaining, 0, 'POINT', 0, 'COMMA')}₫|">100.000₫</strong>
+                để được miễn phí vận chuyển.
+            </p>
+            <p class="freeship freeship-ok" th:unless="${freeShipRemaining.signum() > 0}">
+                Đơn hàng đủ điều kiện miễn phí vận chuyển.
+            </p>
+
+            <!-- /checkout sẽ được làm ở bước Đặt hàng (CheckoutFacade) -->
+            <a class="btn btn-dark btn-block" th:href="@{/checkout}">Tiến hành thanh toán</a>
+        </aside>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

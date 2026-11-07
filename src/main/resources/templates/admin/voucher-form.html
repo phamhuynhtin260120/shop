@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(${form.id == null ? 'Thêm voucher' : 'Sửa voucher'})}"></head>
+<body>
+<header th:replace="~{fragments/layout :: header}"></header>
+
+<main class="container section">
+    <nav th:replace="~{fragments/layout :: adminNav('vouchers')}"></nav>
+    <h1 class="page-title" th:text="${form.id == null} ? 'Thêm voucher' : 'Sửa voucher ' + ${form.code}">Thêm voucher</h1>
+
+    <form class="panel admin-form" th:action="@{/admin/vouchers}" th:object="${form}" method="post" novalidate>
+        <input type="hidden" th:field="*{id}">
+        <div class="field-grid">
+            <div class="field">
+                <label for="code">Mã voucher</label>
+                <input id="code" type="text" th:field="*{code}" placeholder="VD: GIAM20">
+                <p class="field-error" th:if="${#fields.hasErrors('code')}" th:errors="*{code}"></p>
+            </div>
+            <div class="field">
+                <label for="type">Loại</label>
+                <select id="type" th:field="*{type}">
+                    <option value="PERCENT">Giảm theo phần trăm (%)</option>
+                    <option value="FIXED">Giảm số tiền cố định (đồng)</option>
+                </select>
+            </div>
+        </div>
+        <div class="field-grid">
+            <div class="field">
+                <label for="value">Giá trị (% hoặc đồng)</label>
+                <input id="value" type="number" min="1" th:field="*{value}">
+                <p class="field-error" th:if="${#fields.hasErrors('value')}" th:errors="*{value}"></p>
+            </div>
+            <div class="field">
+                <label for="minOrder">Đơn tối thiểu (đồng)</label>
+                <input id="minOrder" type="number" min="0" step="1000" th:field="*{minOrder}">
+                <p class="field-error" th:if="${#fields.hasErrors('minOrder')}" th:errors="*{minOrder}"></p>
+            </div>
+        </div>
+        <div class="field-grid">
+            <div class="field">
+                <label for="expiresAt">Hạn dùng (để trống nếu không giới hạn)</label>
+                <input id="expiresAt" type="date" th:field="*{expiresAt}">
+            </div>
+            <div class="field">
+                <label for="usageLimit">Số lượt dùng tối đa (0 = không giới hạn)</label>
+                <input id="usageLimit" type="number" min="0" th:field="*{usageLimit}">
+                <p class="field-error" th:if="${#fields.hasErrors('usageLimit')}" th:errors="*{usageLimit}"></p>
+            </div>
+        </div>
+        <div class="form-actions">
+            <a class="btn btn-outline" th:href="@{/admin/vouchers}">Hủy</a>
+            <button class="btn btn-dark" type="submit">Lưu voucher</button>
+        </div>
+    </form>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

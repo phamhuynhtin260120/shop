@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Quản lý sản phẩm')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: header}"></header>
+
+<main class="container section">
+    <nav th:replace="~{fragments/layout :: adminNav('products')}"></nav>
+    <div class="section-head">
+        <h1 class="page-title">Sản phẩm <span class="muted small" th:text="'(' + ${#lists.size(products)} + ')'"></span></h1>
+        <a class="btn btn-dark btn-sm" th:href="@{/admin/products/new}">+ Thêm sản phẩm</a>
+    </div>
+
+    <div class="table-wrap">
+        <table class="table">
+            <thead>
+            <tr><th>ID</th><th>Tên</th><th>Danh mục</th><th class="num">Giá</th><th class="num">Tồn kho</th><th>Trạng thái</th><th>Thao tác</th></tr>
+            </thead>
+            <tbody>
+            <tr th:each="p : ${products}" th:classappend="${!p.active} ? 'row-muted'">
+                <td th:text="${p.id}">1</td>
+                <td>
+                    <a th:href="@{/products/{id}(id=${p.id})}" th:text="${p.name}">Tên</a>
+                    <span th:if="${p.bestSeller}" class="tag tag-inline">Best Seller</span>
+                </td>
+                <td th:text="${p.category.name}">Áo</td>
+                <td class="num" th:text="|${#numbers.formatDecimal(p.price, 0, 'POINT', 0, 'COMMA')}₫|">0₫</td>
+                <td class="num" th:classappend="${p.stock == 0} ? 'text-danger'" th:text="${p.stock}">0</td>
+                <td><span th:class="${p.active} ? 'status status-delivered' : 'status status-cancelled'"
+                          th:text="${p.active} ? 'Đang bán' : 'Đã ẩn'">Đang bán</span></td>
+                <td class="actions">
+                    <a class="btn btn-outline btn-sm" th:href="@{/admin/products/{id}/edit(id=${p.id})}">Sửa</a>
+                    <form th:action="@{/admin/products/{id}/toggle(id=${p.id})}" method="post">
+                        <button class="btn-text" type="submit" th:text="${p.active} ? 'Ẩn' : 'Hiện'">Ẩn</button>
+                    </form>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

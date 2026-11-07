@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Đơn hàng của tôi')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: header}"></header>
+
+<main class="container section">
+    <nav class="breadcrumb"><a th:href="@{/}">Trang chủ</a> / <span>Đơn hàng của tôi</span></nav>
+    <h1 class="page-title">Đơn hàng của tôi</h1>
+
+    <div class="empty" th:if="${#lists.isEmpty(orders)}">
+        <p>Bạn chưa có đơn hàng nào.</p>
+        <a class="btn btn-dark" th:href="@{/products}">Mua sắm ngay</a>
+    </div>
+
+    <div class="table-wrap" th:unless="${#lists.isEmpty(orders)}">
+        <table class="table">
+            <thead>
+            <tr><th>Mã đơn</th><th>Ngày đặt</th><th>Số lượng</th><th>Thanh toán</th><th class="num">Tổng tiền</th><th>Trạng thái</th></tr>
+            </thead>
+            <tbody>
+            <tr th:each="o : ${orders}">
+                <td><a class="link-strong" th:href="@{/orders/{id}(id=${o.id})}" th:text="${o.code}">PS...</a></td>
+                <td th:text="${#temporals.format(o.createdAt, 'dd/MM/yyyy HH:mm')}">06/11/2026</td>
+                <td th:text="${o.totalQuantity}">2</td>
+                <td th:text="${o.paymentMethodLabel}">COD</td>
+                <td class="num" th:text="|${#numbers.formatDecimal(o.total, 0, 'POINT', 0, 'COMMA')}₫|">0₫</td>
+                <td><span th:class="'status status-' + ${#strings.toLowerCase(o.status)}" th:text="${o.state.label()}">Chờ thanh toán</span></td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Tổng quan quản trị')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: header}"></header>
+
+<main class="container section">
+    <nav th:replace="~{fragments/layout :: adminNav('dashboard')}"></nav>
+    <h1 class="page-title">Tổng quan</h1>
+    <p class="muted small">Doanh thu chỉ tính đơn đã xác nhận, đang giao và đã giao.</p>
+
+    <div class="stat-grid">
+        <div class="stat">
+            <span class="stat-label">Doanh thu</span>
+            <strong th:text="|${#numbers.formatDecimal(stats.revenue(), 0, 'POINT', 0, 'COMMA')}₫|">0₫</strong>
+        </div>
+        <div class="stat">
+            <span class="stat-label">Đơn có doanh thu / tổng đơn</span>
+            <strong th:text="${stats.completedOrders()} + ' / ' + ${stats.totalOrders()}">0 / 0</strong>
+        </div>
+        <div class="stat">
+            <span class="stat-label">Giá trị trung bình mỗi đơn</span>
+            <strong th:text="|${#numbers.formatDecimal(stats.averageOrderValue(), 0, 'POINT', 0, 'COMMA')}₫|">0₫</strong>
+        </div>
+        <div class="stat">
+            <span class="stat-label">Khách hàng / sản phẩm đang bán</span>
+            <strong th:text="${stats.customers()} + ' / ' + ${stats.activeProducts()}">0 / 0</strong>
+        </div>
+    </div>
+
+    <div class="admin-grid">
+        <section class="panel">
+            <h2>Doanh thu 7 ngày gần nhất</h2>
+            <div class="bars" role="img" aria-label="Biểu đồ doanh thu 7 ngày">
+                <div class="bar-col" th:each="d : ${stats.last7Days()}">
+                    <span class="bar-value" th:text="${d.amount().signum() == 0 ? '' : d.thousands() + 'k'}"></span>
+                    <div class="bar" th:style="|height:${d.percent()}%|"></div>
+                    <span class="bar-label" th:text="${d.label()}">01/11</span>
+                </div>
+            </div>
+        </section>
+
+        <section class="panel">
+            <h2>Đơn hàng theo trạng thái</h2>
+            <ul class="status-list">
+                <li th:each="e : ${stats.ordersByStatus()}">
+                    <span th:class="'status status-' + ${#strings.toLowerCase(e.key)}" th:text="${statusLabels[e.key]}">Trạng thái</span>
+                    <strong th:text="${e.value}">0</strong>
+                </li>
+            </ul>
+        </section>
+    </div>
+
+    <section class="panel">
+        <h2>Sản phẩm bán chạy</h2>
+        <p class="muted" th:if="${#lists.isEmpty(stats.topProducts())}">Chưa có đơn hàng nào được xác nhận.</p>
+        <div class="table-wrap" th:unless="${#lists.isEmpty(stats.topProducts())}">
+            <table class="table">
+                <thead><tr><th>#</th><th>Sản phẩm</th><th class="num">Đã bán</th><th class="num">Doanh thu</th></tr></thead>
+                <tbody>
+                <tr th:each="t, s : ${stats.topProducts()}">
+                    <td th:text="${s.count}">1</td>
+                    <td><a th:href="@{/products/{id}(id=${t.productId()})}" th:text="${t.name()}">Tên</a></td>
+                    <td class="num" th:text="${t.quantity()}">0</td>
+                    <td class="num" th:text="|${#numbers.formatDecimal(t.revenue(), 0, 'POINT', 0, 'COMMA')}₫|">0₫</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

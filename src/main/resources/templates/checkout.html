@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Thanh toán')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: header}"></header>
+
+<main class="container section">
+    <nav class="breadcrumb"><a th:href="@{/}">Trang chủ</a> / <a th:href="@{/cart}">Giỏ hàng</a> / <span>Thanh toán</span></nav>
+    <h1 class="page-title">Thanh toán</h1>
+
+    <form class="checkout" th:action="@{/checkout}" th:object="${form}" method="post" novalidate>
+        <div class="checkout-main">
+
+            <section class="panel">
+                <h2>1. Thông tin nhận hàng</h2>
+                <div class="field-grid">
+                    <div class="field">
+                        <label for="receiverName">Họ và tên</label>
+                        <input id="receiverName" type="text" th:field="*{receiverName}">
+                        <p class="field-error" th:if="${#fields.hasErrors('receiverName')}" th:errors="*{receiverName}"></p>
+                    </div>
+                    <div class="field">
+                        <label for="phone">Số điện thoại</label>
+                        <input id="phone" type="tel" th:field="*{phone}">
+                        <p class="field-error" th:if="${#fields.hasErrors('phone')}" th:errors="*{phone}"></p>
+                    </div>
+                </div>
+                <div class="field">
+                    <label for="address">Địa chỉ giao hàng</label>
+                    <textarea id="address" rows="2" th:field="*{address}"></textarea>
+                    <p class="field-error" th:if="${#fields.hasErrors('address')}" th:errors="*{address}"></p>
+                </div>
+                <div class="field">
+                    <label for="note">Ghi chú (không bắt buộc)</label>
+                    <textarea id="note" rows="2" th:field="*{note}" placeholder="Ví dụ: giao giờ hành chính"></textarea>
+                </div>
+            </section>
+
+            <!-- Mẫu STRATEGY: mỗi lựa chọn là một ShippingStrategy -->
+            <section class="panel">
+                <h2>2. Phương thức vận chuyển</h2>
+                <label class="option" th:each="s : ${shippingOptions}">
+                    <input type="radio" th:field="*{shippingMethod}" th:value="${s.code()}" onchange="refreshTotals()">
+                    <span class="option-text">
+                        <strong th:text="${s.label()}">Giao tiêu chuẩn</strong>
+                        <span class="muted small" th:text="'Dự kiến ' + ${s.estimatedDays()} + ' ngày'">Dự kiến 4 ngày</span>
+                    </span>
+                </label>
+                <p class="hint hint-ok" th:if="${summary.shippingCode() == 'FREE'}">
+                    Đơn từ 500.000₫ chọn giao tiêu chuẩn được miễn phí vận chuyển.
+                </p>
+            </section>
+
+            <!-- Mẫu FACTORY METHOD: mỗi lựa chọn là một PaymentCreator -->
+            <section class="panel">
+                <h2>3. Phương thức thanh toán</h2>
+                <label class="option" th:each="pm : ${paymentOptions}">
+                    <input type="radio" th:field="*{paymentMethod}" th:value="${pm.code()}">
+                    <span class="option-text"><strong th:text="${pm.label()}">COD</strong></span>
+                </label>
+                <p class="muted small">VNPay và MoMo đang chạy ở chế độ giả lập. MoMo từ chối giao dịch trên 20.000.000₫.</p>
+            </section>
+        </div>
+
+        <!-- Tóm tắt đơn: mẫu DECORATOR tính các dòng giảm giá, VAT -->
+        <aside class="cart-summary">
+            <h2>Đơn hàng (<span th:text="${cart.totalQuantity}">3</span>)</h2>
+            <ul class="mini-lines">
+                <li th:each="item : ${cart.items}">
+                    <span><span th:text="${item.product.name}">Tên</span> <span class="muted" th:text="'× ' + ${item.quantity}">× 1</span></span>
+                    <span th:text="|${#numbers.formatDecimal(item.lineTotal, 0, 'POINT', 0, 'COMMA')}₫|">0₫</span>
+                </li>
+            </ul>
+
+            <div class="voucher">
+                <input type="text" th:field="*{voucherCode}" placeholder="Mã giảm giá" aria-label="Mã giảm giá">
+                <button id="btn-refresh" class="btn btn-outline btn-sm" type="submit"
+                        formmethod="get" th:formaction="@{/checkout}" formnovalidate>Áp dụng</button>
+            </div>
+            <p class="field-error" th:if="${summary.voucherError() != null}" th:text="${summary.voucherError()}">Lỗi voucher</p>
+            <p class="hint hint-ok" th:if="${summary.voucher() != null}"
+               th:text="'Đã áp dụng ' + ${summary.voucher().code} + ': ' + ${summary.voucher().description}">Đã áp dụng</p>
+
+            <div class="sum-row"><span>Tạm tính</span>
+                <span th:text="|${#numbers.formatDecimal(summary.subtotal(), 0, 'POINT', 0, 'COMMA')}₫|">0₫</span></div>
+            <div class="sum-row discount" th:if="${summary.discount().signum() > 0}">
+                <span>Giảm giá<span class="muted small" th:if="${summary.memberDiscountPercent() > 0}"
+                      th:text="'(gồm thành viên thân thiết ' + ${summary.memberDiscountPercent()} + '%)'"></span></span>
+                <span th:text="|-${#numbers.formatDecimal(summary.discount(), 0, 'POINT', 0, 'COMMA')}₫|">0₫</span></div>
+            <div class="sum-row"><span>Thuế VAT (8%)</span>
+                <span th:text="|${#numbers.formatDecimal(summary.vat(), 0, 'POINT', 0, 'COMMA')}₫|">0₫</span></div>
+            <div class="sum-row"><span th:text="'Phí vận chuyển · ' + ${summary.shippingLabel()}">Phí vận chuyển</span>
+                <span th:text="${summary.shippingFee().signum() == 0 ? 'Miễn phí' : #numbers.formatDecimal(summary.shippingFee(), 0, 'POINT', 0, 'COMMA') + '₫'}">0₫</span></div>
+            <div class="sum-row sum-total"><span>Tổng cộng</span>
+                <strong th:text="|${#numbers.formatDecimal(summary.total(), 0, 'POINT', 0, 'COMMA')}₫|">0₫</strong></div>
+
+            <button class="btn btn-dark btn-block" type="submit">Đặt hàng</button>
+            <p class="muted small">Mã thử nghiệm: GIAM10 (đơn từ 300.000₫), GIAM50K (đơn từ 400.000₫), HETHAN (đã hết hạn).</p>
+        </aside>
+    </form>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+<script>
+    // Đổi cách giao hàng thì tính lại tổng tiền (gửi GET tới /checkout)
+    function refreshTotals() { document.getElementById('btn-refresh').click(); }
+</script>
+</body>
+</html>

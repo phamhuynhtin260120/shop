@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(${form.id == null ? 'Thêm sản phẩm' : 'Sửa sản phẩm'})}"></head>
+<body>
+<header th:replace="~{fragments/layout :: header}"></header>
+
+<main class="container section">
+    <nav th:replace="~{fragments/layout :: adminNav('products')}"></nav>
+    <h1 class="page-title" th:text="${form.id == null} ? 'Thêm sản phẩm' : 'Sửa sản phẩm #' + ${form.id}">Thêm sản phẩm</h1>
+
+    <form class="panel admin-form" th:action="@{/admin/products}" th:object="${form}" method="post" novalidate>
+        <input type="hidden" th:field="*{id}">
+        <div class="field">
+            <label for="name">Tên sản phẩm</label>
+            <input id="name" type="text" th:field="*{name}">
+            <p class="field-error" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></p>
+        </div>
+        <div class="field-grid">
+            <div class="field">
+                <label for="price">Giá (đồng)</label>
+                <input id="price" type="number" min="0" step="1000" th:field="*{price}">
+                <p class="field-error" th:if="${#fields.hasErrors('price')}" th:errors="*{price}"></p>
+            </div>
+            <div class="field">
+                <label for="stock">Tồn kho</label>
+                <input id="stock" type="number" min="0" th:field="*{stock}">
+                <p class="field-error" th:if="${#fields.hasErrors('stock')}" th:errors="*{stock}"></p>
+            </div>
+        </div>
+        <div class="field-grid">
+            <div class="field">
+                <label for="categoryId">Danh mục</label>
+                <select id="categoryId" th:field="*{categoryId}">
+                    <option value="">Chọn danh mục</option>
+                    <option th:each="c : ${categories}" th:value="${c.id}" th:text="${c.name}">Áo</option>
+                </select>
+                <p class="field-error" th:if="${#fields.hasErrors('categoryId')}" th:errors="*{categoryId}"></p>
+            </div>
+            <div class="field">
+                <label for="imageUrl">Đường dẫn ảnh (không bắt buộc)</label>
+                <input id="imageUrl" type="text" th:field="*{imageUrl}" placeholder="/images/ao-so-mi.jpg hoặc https://...">
+            </div>
+        </div>
+        <div class="field">
+            <label for="description">Mô tả</label>
+            <textarea id="description" rows="4" th:field="*{description}"></textarea>
+        </div>
+        <div class="checks">
+            <label class="check"><input type="checkbox" th:field="*{bestSeller}"> Bán chạy (hiện nhãn Best Seller)</label>
+            <label class="check"><input type="checkbox" th:field="*{active}"> Đang bán (bỏ chọn để ẩn khỏi cửa hàng)</label>
+        </div>
+        <div class="form-actions">
+            <a class="btn btn-outline" th:href="@{/admin/products}">Hủy</a>
+            <button class="btn btn-dark" type="submit">Lưu sản phẩm</button>
+        </div>
+    </form>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Đăng ký')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: header}"></header>
+
+<main class="container section">
+    <div class="auth-card">
+        <h1>Tạo tài khoản</h1>
+        <form th:action="@{/register}" th:object="${form}" method="post" class="auth-form" novalidate>
+            <div class="field">
+                <label for="fullName">Họ và tên</label>
+                <input id="fullName" type="text" th:field="*{fullName}" autocomplete="name">
+                <p class="field-error" th:if="${#fields.hasErrors('fullName')}" th:errors="*{fullName}"></p>
+            </div>
+            <div class="field">
+                <label for="email">Email</label>
+                <input id="email" type="email" th:field="*{email}" autocomplete="email">
+                <p class="field-error" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></p>
+            </div>
+            <div class="field">
+                <label for="phone">Số điện thoại</label>
+                <input id="phone" type="tel" th:field="*{phone}" autocomplete="tel">
+                <p class="field-error" th:if="${#fields.hasErrors('phone')}" th:errors="*{phone}"></p>
+            </div>
+            <div class="field">
+                <label for="address">Địa chỉ (không bắt buộc)</label>
+                <textarea id="address" rows="2" th:field="*{address}"></textarea>
+            </div>
+            <div class="field">
+                <label for="password">Mật khẩu</label>
+                <input id="password" type="password" th:field="*{password}" autocomplete="new-password">
+                <p class="field-error" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></p>
+            </div>
+            <div class="field">
+                <label for="confirmPassword">Nhập lại mật khẩu</label>
+                <input id="confirmPassword" type="password" th:field="*{confirmPassword}" autocomplete="new-password">
+            </div>
+            <button class="btn btn-dark btn-block" type="submit">Đăng ký</button>
+        </form>
+        <p class="muted small">Đã có tài khoản? <a class="link-strong" th:href="@{/login}">Đăng nhập</a></p>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

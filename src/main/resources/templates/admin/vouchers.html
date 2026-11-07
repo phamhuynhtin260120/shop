@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Quản lý voucher')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: header}"></header>
+
+<main class="container section">
+    <nav th:replace="~{fragments/layout :: adminNav('vouchers')}"></nav>
+    <div class="section-head">
+        <h1 class="page-title">Voucher</h1>
+        <a class="btn btn-dark btn-sm" th:href="@{/admin/vouchers/new}">+ Thêm voucher</a>
+    </div>
+
+    <div class="empty" th:if="${#lists.isEmpty(vouchers)}"><p>Chưa có voucher nào.</p></div>
+    <div class="table-wrap" th:unless="${#lists.isEmpty(vouchers)}">
+        <table class="table">
+            <thead>
+            <tr><th>Mã</th><th>Ưu đãi</th><th class="num">Đơn tối thiểu</th><th>Hạn dùng</th><th class="num">Đã dùng</th><th>Tình trạng</th><th></th></tr>
+            </thead>
+            <tbody>
+            <tr th:each="v : ${vouchers}">
+                <td><strong th:text="${v.code}">GIAM10</strong></td>
+                <td th:text="${v.description}">Giảm 10%</td>
+                <td class="num" th:text="|${#numbers.formatDecimal(v.minOrder, 0, 'POINT', 0, 'COMMA')}₫|">0₫</td>
+                <td th:text="${v.expiresAt == null ? 'Không giới hạn' : #temporals.format(v.expiresAt, 'dd/MM/yyyy')}">31/12/2026</td>
+                <td class="num" th:text="${v.usedCount + (v.usageLimit > 0 ? ' / ' + v.usageLimit : '')}">0</td>
+                <td>
+                    <span th:if="${v.isExpired(today)}" class="status status-cancelled">Hết hạn</span>
+                    <span th:if="${!v.isExpired(today) and v.usedUp}" class="status status-pending">Hết lượt</span>
+                    <span th:if="${!v.isExpired(today) and !v.usedUp}" class="status status-delivered">Đang áp dụng</span>
+                </td>
+                <td><a class="btn btn-outline btn-sm" th:href="@{/admin/vouchers/{id}/edit(id=${v.id})}">Sửa</a></td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

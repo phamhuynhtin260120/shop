@@ -27,4 +27,6 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     Page<Product> findByActiveTrueAndCategorySlug(String slug, Pageable pageable);
 
     Page<Product> findByActiveTrueAndNameContainingIgnoreCase(String keyword, Pageable pageable);
+
+    long countByActiveTrue();
 }

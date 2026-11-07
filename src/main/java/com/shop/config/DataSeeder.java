@@ -2,13 +2,19 @@ package com.shop.config;
 
 import com.shop.entity.Category;
 import com.shop.entity.Product;
+import com.shop.entity.User;
+import com.shop.entity.Voucher;
 import com.shop.repository.CategoryRepository;
 import com.shop.repository.ProductRepository;
+import com.shop.repository.UserRepository;
+import com.shop.repository.VoucherRepository;
+import com.shop.service.AuthService;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 /**
@@ -18,17 +24,67 @@ import java.time.LocalDateTime;
 @Component
 public class DataSeeder implements CommandLineRunner {
 
+    /** Tài khoản mẫu để chạy thử (ghi trong báo cáo, mục 4.1). */
+    public static final String DEMO_EMAIL = "khach@patternstore.vn";
+    public static final String DEMO_PASSWORD = "123456";
+    public static final String ADMIN_EMAIL = "admin@patternstore.vn";
+    public static final String ADMIN_PASSWORD = "admin123";
+
     private final CategoryRepository categoryRepository;
     private final ProductRepository productRepository;
+    private final UserRepository userRepository;
+    private final VoucherRepository voucherRepository;
+    private final AuthService authService;
 
-    public DataSeeder(CategoryRepository categoryRepository, ProductRepository productRepository) {
+    public DataSeeder(CategoryRepository categoryRepository, ProductRepository productRepository,
+                      UserRepository userRepository, VoucherRepository voucherRepository,
+                      AuthService authService) {
         this.categoryRepository = categoryRepository;
         this.productRepository = productRepository;
+        this.userRepository = userRepository;
+        this.voucherRepository = voucherRepository;
+        this.authService = authService;
     }
 
     @Override
     @Transactional
     public void run(String... args) {
+        seedDemoUser();
+        seedCatalog();
+        seedVouchers();
+    }
+
+    private void seedVouchers() {
+        if (voucherRepository.count() > 0) {
+            return;
+        }
+        LocalDate today = LocalDate.now();
+        voucherRepository.save(new Voucher("GIAM10", Voucher.PERCENT, new BigDecimal("10"),
+                new BigDecimal("300000"), today.plusMonths(2), 100));
+        voucherRepository.save(new Voucher("GIAM50K", Voucher.FIXED, new BigDecimal("50000"),
+                new BigDecimal("400000"), today.plusMonths(2), 100));
+        voucherRepository.save(new Voucher("HETHAN", Voucher.PERCENT, new BigDecimal("20"),
+                BigDecimal.ZERO, today.minusDays(1), 100));
+    }
+
+    private void seedDemoUser() {
+        User customer = userRepository.findByEmail(DEMO_EMAIL)
+                .orElseGet(() -> new User(DEMO_EMAIL, "Nguyễn Văn Khách", "0901234567",
+                        "12 Nguyễn Văn Bảo, Phường 4, Gò Vấp, TP. Hồ Chí Minh"));
+        if (customer.getPasswordHash() == null) {            // tài khoản tạo từ phiên bản trước chưa có mật khẩu
+            customer.setPasswordHash(authService.hash(DEMO_PASSWORD));
+        }
+        userRepository.save(customer);
+
+        if (userRepository.findByEmail(ADMIN_EMAIL).isEmpty()) {
+            User admin = new User(ADMIN_EMAIL, "Quản trị viên", "0909999999", "Pattern Store");
+            admin.setRole(User.ROLE_ADMIN);
+            admin.setPasswordHash(authService.hash(ADMIN_PASSWORD));
+            userRepository.save(admin);
+        }
+    }
+
+    private void seedCatalog() {
         if (categoryRepository.count() > 0) {
             return;
         }

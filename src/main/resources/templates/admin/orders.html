@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Quản lý đơn hàng')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: header}"></header>
+
+<main class="container section">
+    <nav th:replace="~{fragments/layout :: adminNav('orders')}"></nav>
+    <div class="section-head">
+        <h1 class="page-title">Quản lý đơn hàng</h1>
+        <span class="muted" th:text="${#lists.size(orders)} + ' đơn'">0 đơn</span>
+    </div>
+
+    <div class="empty" th:if="${#lists.isEmpty(orders)}"><p>Chưa có đơn hàng nào.</p></div>
+
+    <div class="table-wrap" th:unless="${#lists.isEmpty(orders)}">
+        <table class="table">
+            <thead>
+            <tr><th>Mã đơn</th><th>Khách</th><th>Ngày đặt</th><th>Thanh toán</th><th class="num">Tổng tiền</th><th>Trạng thái</th><th>Thao tác</th></tr>
+            </thead>
+            <tbody>
+            <tr th:each="o : ${orders}">
+                <td><strong th:text="${o.code}">PS</strong></td>
+                <td th:text="${o.receiverName}">Tên</td>
+                <td th:text="${#temporals.format(o.createdAt, 'dd/MM HH:mm')}">06/11</td>
+                <td th:text="${o.paymentMethodLabel}">COD</td>
+                <td class="num" th:text="|${#numbers.formatDecimal(o.total, 0, 'POINT', 0, 'COMMA')}₫|">0₫</td>
+                <td><span th:class="'status status-' + ${#strings.toLowerCase(o.status)}" th:text="${o.state.label()}">Trạng thái</span></td>
+                <td class="actions">
+                    <!-- Mẫu State: chỉ hiện các hành động hợp lệ với trạng thái hiện tại -->
+                    <form th:if="${o.state.canShip()}" th:action="@{/admin/orders/{id}/ship(id=${o.id})}" method="post">
+                        <button class="btn btn-dark btn-sm" type="submit">Giao hàng</button></form>
+                    <form th:if="${o.state.canDeliver()}" th:action="@{/admin/orders/{id}/deliver(id=${o.id})}" method="post">
+                        <button class="btn btn-dark btn-sm" type="submit">Đã giao</button></form>
+                    <form th:if="${o.state.canCancel()}" th:action="@{/admin/orders/{id}/cancel(id=${o.id})}" method="post">
+                        <button class="btn btn-outline btn-sm" type="submit">Hủy</button></form>
+                    <!-- Nút thử: cố hủy đơn đang giao để thấy State từ chối -->
+                    <form th:if="${o.state.canDeliver()}" th:action="@{/admin/orders/{id}/cancel(id=${o.id})}" method="post">
+                        <button class="btn-text" type="submit" title="Demo: State sẽ từ chối">Thử hủy</button></form>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

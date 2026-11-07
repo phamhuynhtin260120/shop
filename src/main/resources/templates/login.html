@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Đăng nhập')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: header}"></header>
+
+<main class="container section">
+    <div class="auth-card">
+        <h1>Đăng nhập</h1>
+        <p class="hint" th:if="${param.required}">Vui lòng đăng nhập để dùng giỏ hàng, thanh toán và xem đơn hàng.</p>
+
+        <form th:action="@{/login}" method="post" class="auth-form">
+            <input type="hidden" name="redirect" th:value="${redirect}">
+            <div class="field">
+                <label for="email">Email</label>
+                <input id="email" type="email" name="email" th:value="${email}" required autocomplete="email" autofocus>
+            </div>
+            <div class="field">
+                <label for="password">Mật khẩu</label>
+                <input id="password" type="password" name="password" required autocomplete="current-password">
+            </div>
+            <button class="btn btn-dark btn-block" type="submit">Đăng nhập</button>
+        </form>
+
+        <p class="muted small">Chưa có tài khoản? <a class="link-strong" th:href="@{/register}">Đăng ký</a></p>
+        <div class="demo-accounts">
+            <strong>Tài khoản chạy thử</strong>
+            <span>Khách hàng: khach@patternstore.vn / 123456</span>
+            <span>Quản trị viên: admin@patternstore.vn / admin123</span>
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>
