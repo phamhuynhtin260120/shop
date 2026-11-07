@@ -11,6 +11,7 @@ import com.shop.repository.VoucherRepository;
 import com.shop.service.AuthService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,6 +24,7 @@ import java.time.LocalDateTime;
  * Muốn làm lại từ đầu: docker compose down -v  rồi chạy lại ứng dụng.
  */
 @Component
+@Order(1)
 public class DataSeeder implements CommandLineRunner {
 
     /** Tài khoản mẫu để chạy thử (ghi trong báo cáo, mục 4.1). */

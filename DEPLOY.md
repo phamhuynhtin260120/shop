@@ -40,7 +40,7 @@ gcloud sql instances create $INSTANCE \
 
 gcloud sql databases create shopdb --instance=$INSTANCE
 
-DB_PASS=$(openssl rand -base64 18)
+DB_PASS=$(openssl rand -base64 18 | tr -d '/+=')
 gcloud sql users create shop --instance=$INSTANCE --password="$DB_PASS"
 ```
 
@@ -53,20 +53,36 @@ read -s -p "Nhập mật khẩu cho tài khoản admin@patternstore.vn: " ADMIN_
 printf %s "$ADMIN_PASS" | gcloud secrets create shop-admin-password --data-file=-
 ```
 
-## 4. Cấp quyền cho service account mặc định
+## 4. Tạo service account riêng cho app (chỉ có đúng quyền cần dùng)
+
+Không dùng service account mặc định, vì nó dùng chung với các service khác trong project.
 
 ```bash
-PROJECT_NUMBER=$(gcloud projects describe $PROJECT_ID --format='value(projectNumber)')
-SA=$PROJECT_NUMBER-compute@developer.gserviceaccount.com
-for ROLE in roles/cloudsql.client roles/secretmanager.secretAccessor roles/cloudbuild.builds.builder; do
-  gcloud projects add-iam-policy-binding $PROJECT_ID --member=serviceAccount:$SA --role=$ROLE --condition=None
+gcloud iam service-accounts create shop-run --display-name="Pattern Store Cloud Run"
+SA=shop-run@$PROJECT_ID.iam.gserviceaccount.com
+gcloud projects add-iam-policy-binding $PROJECT_ID \
+  --member=serviceAccount:$SA --role=roles/cloudsql.client --condition=None
+for S in shop-db-password shop-admin-password; do
+  gcloud secrets add-iam-policy-binding $S --member=serviceAccount:$SA --role=roles/secretmanager.secretAccessor
 done
+```
+
+Tạo thêm service account riêng để **build** (Cloud Build đọc mã nguồn, ghi image):
+
+```bash
+gcloud iam service-accounts create shop-build --display-name="Pattern Store build"
+BUILD_SA=shop-build@$PROJECT_ID.iam.gserviceaccount.com
+gcloud projects add-iam-policy-binding $PROJECT_ID \
+  --member=serviceAccount:$BUILD_SA --role=roles/run.builder --condition=None
+sleep 60   # chờ quyền IAM có hiệu lực
 ```
 
 ## 5. Build và deploy (5–8 phút lần đầu)
 
 ```bash
 gcloud run deploy shop --source . --region=$REGION --allow-unauthenticated \
+  --service-account=$SA \
+  --build-service-account=projects/$PROJECT_ID/serviceAccounts/$BUILD_SA \
   --memory=1Gi --cpu=1 --cpu-boost --min-instances=0 --max-instances=1 \
   --add-cloudsql-instances=$PROJECT_ID:$REGION:$INSTANCE \
   --set-env-vars=SPRING_PROFILES_ACTIVE=prod,DB_INSTANCE=$PROJECT_ID:$REGION:$INSTANCE \

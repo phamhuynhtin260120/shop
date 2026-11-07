@@ -310,3 +310,6 @@ h1, h2, h3 { line-height: 1.25; margin: 0; font-weight: 600; }
   .stat-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .admin-grid { grid-template-columns: 1fr; }
 }
+
+/* Ảnh sản phẩm từ DummyJSON là ảnh nền trắng, tỷ lệ vuông: hiển thị trọn ảnh thay vì cắt */
+.card-media img, .detail-media img, .cart-thumb img { object-fit: contain; background: #fff; }

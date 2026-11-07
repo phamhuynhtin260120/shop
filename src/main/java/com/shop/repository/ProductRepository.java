@@ -29,4 +29,8 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     Page<Product> findByActiveTrueAndNameContainingIgnoreCase(String keyword, Pageable pageable);
 
     long countByActiveTrue();
+
+    boolean existsByImageUrlStartingWith(String prefix);
+
+    List<Product> findByImageUrlIsNullAndActiveTrue();
 }
