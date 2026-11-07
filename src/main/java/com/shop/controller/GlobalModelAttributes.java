@@ -5,6 +5,7 @@ import com.shop.entity.User;
 import com.shop.service.CartService;
 import com.shop.service.CategoryService;
 import com.shop.service.CurrentUserService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ModelAttribute;
 
@@ -26,6 +27,15 @@ public class GlobalModelAttributes {
         this.categoryService = categoryService;
         this.cartService = cartService;
         this.currentUserService = currentUserService;
+    }
+
+    @Value("${app.show-admin-demo:true}")
+    private boolean showAdminDemo;
+
+    /** Có hiện tài khoản admin chạy thử trên trang đăng nhập không (tắt khi deploy). */
+    @ModelAttribute("showAdminDemo")
+    public boolean showAdminDemo() {
+        return showAdminDemo;
     }
 
     /** Người đang đăng nhập (null nếu là khách vãng lai), dùng cho header. */

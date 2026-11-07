@@ -9,6 +9,7 @@ import com.shop.repository.ProductRepository;
 import com.shop.repository.UserRepository;
 import com.shop.repository.VoucherRepository;
 import com.shop.service.AuthService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,22 +29,24 @@ public class DataSeeder implements CommandLineRunner {
     public static final String DEMO_EMAIL = "khach@patternstore.vn";
     public static final String DEMO_PASSWORD = "123456";
     public static final String ADMIN_EMAIL = "admin@patternstore.vn";
-    public static final String ADMIN_PASSWORD = "admin123";
 
     private final CategoryRepository categoryRepository;
     private final ProductRepository productRepository;
     private final UserRepository userRepository;
     private final VoucherRepository voucherRepository;
     private final AuthService authService;
+    private final String adminPassword;
 
     public DataSeeder(CategoryRepository categoryRepository, ProductRepository productRepository,
                       UserRepository userRepository, VoucherRepository voucherRepository,
-                      AuthService authService) {
+                      AuthService authService,
+                      @Value("${app.admin-password}") String adminPassword) {
         this.categoryRepository = categoryRepository;
         this.productRepository = productRepository;
         this.userRepository = userRepository;
         this.voucherRepository = voucherRepository;
         this.authService = authService;
+        this.adminPassword = adminPassword;
     }
 
     @Override
@@ -79,7 +82,7 @@ public class DataSeeder implements CommandLineRunner {
         if (userRepository.findByEmail(ADMIN_EMAIL).isEmpty()) {
             User admin = new User(ADMIN_EMAIL, "Quản trị viên", "0909999999", "Pattern Store");
             admin.setRole(User.ROLE_ADMIN);
-            admin.setPasswordHash(authService.hash(ADMIN_PASSWORD));
+            admin.setPasswordHash(authService.hash(adminPassword));
             userRepository.save(admin);
         }
     }
