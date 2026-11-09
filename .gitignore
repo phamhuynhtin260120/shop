@@ -34,3 +34,6 @@ target/
 .DS_Store
 * 2
 * 2.*
+
+# Ảnh tải lên khi chạy trên máy
+uploads/

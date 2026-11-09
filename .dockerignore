@@ -5,3 +5,4 @@ target/
 .idea/
 *.md
 compose.yaml
+uploads/

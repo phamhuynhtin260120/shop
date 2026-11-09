@@ -8,7 +8,8 @@
     <nav th:replace="~{fragments/layout :: adminNav('products')}"></nav>
     <h1 class="page-title" th:text="${form.id == null} ? 'Thêm sản phẩm' : 'Sửa sản phẩm #' + ${form.id}">Thêm sản phẩm</h1>
 
-    <form class="panel admin-form" th:action="@{/admin/products}" th:object="${form}" method="post" novalidate>
+    <form class="panel admin-form" th:action="@{/admin/products}" th:object="${form}" method="post"
+          enctype="multipart/form-data" novalidate>
         <input type="hidden" th:field="*{id}">
         <div class="field">
             <label for="name">Tên sản phẩm</label>
@@ -37,8 +38,15 @@
                 <p class="field-error" th:if="${#fields.hasErrors('categoryId')}" th:errors="*{categoryId}"></p>
             </div>
             <div class="field">
-                <label for="imageUrl">Đường dẫn ảnh (không bắt buộc)</label>
-                <input id="imageUrl" type="text" th:field="*{imageUrl}" placeholder="/images/ao-so-mi.jpg hoặc https://...">
+                <label for="imageFile">Ảnh sản phẩm (JPG, PNG, WEBP, tối đa 5MB)</label>
+                <input id="imageFile" type="file" name="imageFile" accept="image/jpeg,image/png,image/webp,image/gif">
+            </div>
+        </div>
+        <div class="image-row">
+            <img id="imagePreview" class="image-preview" th:src="*{imageUrl}" th:classappend="*{imageUrl == null or imageUrl == ''} ? 'is-empty'" alt="Xem trước ảnh">
+            <div class="field image-url">
+                <label for="imageUrl">Hoặc dán đường dẫn ảnh (để trống nếu tải ảnh từ máy)</label>
+                <input id="imageUrl" type="text" th:field="*{imageUrl}" placeholder="https://...">
             </div>
         </div>
         <div class="field">
@@ -57,5 +65,13 @@
 </main>
 
 <footer th:replace="~{fragments/layout :: footer}"></footer>
+<script>
+    // Xem trước ảnh ngay khi chọn file, trước khi bấm Lưu
+    document.getElementById('imageFile').addEventListener('change', function (e) {
+        const file = e.target.files[0];
+        const img = document.getElementById('imagePreview');
+        if (file) { img.src = URL.createObjectURL(file); img.classList.remove('is-empty'); }
+    });
+</script>
 </body>
 </html>

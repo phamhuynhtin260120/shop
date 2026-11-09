@@ -15,7 +15,8 @@ import java.util.List;
  * Dữ liệu dùng chung cho MỌI trang (menu danh mục, số lượng giỏ hàng).
  * Nhờ vậy từng Controller không phải tự thêm vào Model.
  */
-@ControllerAdvice
+/* Chỉ áp dụng cho Controller trả trang HTML (gói com.shop.controller), không áp dụng cho MediaController trả ảnh */
+@ControllerAdvice(basePackages = "com.shop.controller")
 public class GlobalModelAttributes {
 
     private final CategoryService categoryService;

@@ -313,3 +313,9 @@ h1, h2, h3 { line-height: 1.25; margin: 0; font-weight: 600; }
 
 /* Ảnh sản phẩm từ DummyJSON là ảnh nền trắng, tỷ lệ vuông: hiển thị trọn ảnh thay vì cắt */
 .card-media img, .detail-media img, .cart-thumb img { object-fit: contain; background: #fff; }
+
+/* ===== Ảnh trong form sản phẩm ===== */
+.image-row { display: flex; gap: 16px; align-items: flex-end; }
+.image-preview { width: 96px; height: 128px; object-fit: contain; background: #fff; border: 1px solid var(--line); flex: none; }
+.image-preview.is-empty { visibility: hidden; }
+.image-url { flex: 1; }

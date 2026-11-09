@@ -95,6 +95,20 @@ Lần đầu mở sẽ chậm khoảng 15–30 giây (container khởi động, 
 - `--max-instances=1`: phiên đăng nhập lưu trong bộ nhớ, chỉ chạy 1 container để không mất phiên.
 - `--min-instances=0`: không có người truy cập thì container tắt, gần như không tốn tiền Cloud Run.
 
+## 6. Bucket Cloud Storage cho ảnh sản phẩm tải lên
+
+Ảnh admin tải lên được lưu trong bucket riêng tư (không mở công khai); ứng dụng tự đọc
+và trả ảnh qua đường dẫn `/media/...`. Chỉ service account `shop-run` được ghi/đọc bucket.
+
+```bash
+BUCKET=$PROJECT_ID-shop-images
+gcloud storage buckets create gs://$BUCKET --location=$REGION \
+  --uniform-bucket-level-access --public-access-prevention
+gcloud storage buckets add-iam-policy-binding gs://$BUCKET \
+  --member=serviceAccount:$SA --role=roles/storage.objectAdmin
+gcloud run services update shop --region=$REGION --update-env-vars=GCS_BUCKET=$BUCKET
+```
+
 ## Cập nhật phiên bản mới
 
 ```bash

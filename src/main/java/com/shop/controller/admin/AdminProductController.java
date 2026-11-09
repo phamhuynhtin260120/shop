@@ -5,11 +5,13 @@ import com.shop.entity.Product;
 import com.shop.exception.BusinessException;
 import com.shop.service.CategoryService;
 import com.shop.service.ProductService;
+import com.shop.storage.ImageService;
 import jakarta.validation.Valid;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 /** Quản lý sản phẩm: danh sách, thêm, sửa, ẩn/hiện. */
@@ -19,10 +21,13 @@ public class AdminProductController {
 
     private final ProductService productService;
     private final CategoryService categoryService;
+    private final ImageService imageService;
 
-    public AdminProductController(ProductService productService, CategoryService categoryService) {
+    public AdminProductController(ProductService productService, CategoryService categoryService,
+                                  ImageService imageService) {
         this.productService = productService;
         this.categoryService = categoryService;
+        this.imageService = imageService;
     }
 
     @GetMapping
@@ -43,11 +48,16 @@ public class AdminProductController {
 
     @PostMapping
     public String save(@Valid @ModelAttribute("form") ProductForm form, BindingResult errors,
+                       @RequestParam(value = "imageFile", required = false) MultipartFile imageFile,
                        Model model, RedirectAttributes flash) {
         if (errors.hasErrors()) {
             return form(form, model);
         }
         try {
+            // Có chọn file từ máy thì tải lên và dùng ảnh đó (ưu tiên hơn ô đường dẫn)
+            if (imageFile != null && !imageFile.isEmpty()) {
+                form.setImageUrl(imageService.upload(imageFile));
+            }
             Product p = productService.save(form);
             flash.addFlashAttribute("success", "Đã lưu sản phẩm \"" + p.getName() + "\"");
             return "redirect:/admin/products";
